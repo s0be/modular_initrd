@@ -1,0 +1,23 @@
+#!/bin/ash
+
+tryresume () {
+	RESUME=`cat /proc/cmdline | sed -re 's:.*resume\=([0-9a-zA-Z\/]*) ?.*:\1:'`
+	OFFSET=`cat /proc/cmdline | sed -re 's:.*resume_offset\=([0-9a-zA-Z\/]*) ?.*:\1:'`
+        echo ''
+        echo '  Attempting to resume from suspend-to-disk. '
+
+	if [ $OFFSET ] ; then
+		echo ' Partition: ' $RESUME ' | Offset: ' $OFFSET
+        	/bin/resume -r $RESUME -o $OFFSET >>/tmp/initrdlog 2>&1 ||
+                	echo '  resume: error: could not resume'
+	else
+		echo ' Partition: ' $RESUME 
+		/bin/resume -r $RESUME >>/tmp/initrdlog 2>&1 ||
+			echo '  resume: error: could not resume'
+	fi
+
+        echo ''
+}
+
+echo "Press any key to skip resume"
+grep -q 'noresume' /proc/cmdline || countdown 3 "" "tryresume"

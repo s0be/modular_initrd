@@ -1,0 +1,11 @@
+#!/bin/ash
+echo $((128 * 1024 * 1024)) > /sys/block/zram0/disksize
+echo $((10 * 1024 * 1024 * 1024)) > /sys/block/zram1/disksize
+echo $((1 * 1024 * 1024 * 1024)) > /sys/block/zram2/disksize
+
+mkfs.ext4 -O dir_nlink,extent,extra_isize,flex_bg,^has_journal,uninit_bg -m0 -b 4096 -L "zram0" /dev/zram0 >>/tmp/initrdlog 2>&1
+mount /dev/zram0 /mnt/ramdisk >>/tmp/initrdlog 2>&1
+chown 1000:10 -R /mnt/ramdisk >>/tmp/initrdlog 2>&1
+mkfs.ext4 -O dir_nlink,extent,extra_isize,flex_bg,^has_journal,uninit_bg -m0 -b 4096 -L "zram1" /dev/zram1 >>/tmp/initrdlog 2>&1
+mkfs.ext4 -O dir_nlink,extent,extra_isize,flex_bg,^has_journal,uninit_bg -m0 -b 4096 -L "zram2" /dev/zram2 >>/tmp/initrdlog 2>&1
+

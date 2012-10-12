@@ -1,0 +1,17 @@
+#!/bin/ash
+#
+countdown () {
+  local CUR=$1
+  local LST=0
+  local ABRT=''
+
+  while [[ $CUR -gt $LST && ! $ABRT ]]
+  do
+    printf "%s..." $CUR
+    CUR=$(( $CUR -1 ))
+    read -t 1 -n 1 
+    [[ $? -eq 0 ]] && ABRT=1
+  done
+  echo
+  [[ $ABRT ]] && $2 || $3
+}

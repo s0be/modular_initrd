@@ -1,0 +1,53 @@
+#!/bin/ash
+mount -t tmpfs -o size=100m tmpfs /tmp
+mount -t proc none /proc >>/tmp/initrdlog 2>&1
+mount -t sysfs none /sys >>/tmp/initrdlog 2>&1
+
+. modules/00-countdown
+. modules/00-shell
+. modules/10-resume
+
+uuidlabel_root() {
+    for cmd in $(cat /proc/cmdline) ; do
+        case $cmd in
+        root=*)
+            dev=${cmd#root=}
+            type=${dev%%=*}
+	    echo "Mounting $dev ($type)" >> /tmp/initrdlog 2>&1
+            if [ $type = "LABEL" ] || [ $type = "UUID" ] ; then
+                mount -o ro $(findfs "$dev") /mnt/root >>/tmp/initrdlog 2>&1
+            else
+                mount -o ro ${dev} /mnt/root >>/tmp/initrdlog 2>&1
+            fi
+            ;;
+        esac
+    done
+}
+
+echo 0 > /proc/sys/kernel/printk
+echo /sbin/mdev > /proc/sys/kernel/hotplug
+mdev -s >>/tmp/initrdlog 2>&1
+
+INIT=/sbin/init
+CMDLINE=`cat /proc/cmdline`
+CUSTOM_INIT=`cat /proc/cmdline | sed -re 's:.*init\=([0-9a-zA-Z\/]*) ?.*:\1:'`
+if [ ! "$CUSTOM_INIT" = "" ]; then
+	echo "Custom init found.  Using ${CUSTOM_INIT}" >>/tmp/initrdlog 2>&1
+        INIT=$CUSTOM_INIT
+fi
+
+. modules/90-zram
+
+uuidlabel_root || rescue_shell
+
+
+# cleanup
+umount /proc
+umount /sys
+cp /tmp/initrdlog /mnt/ramdisk
+umount /mnt/ramdisk
+umount /tmp
+
+# *poof* and we're out.
+exec /bin/busybox switch_root /mnt/root $INIT $CMDLINE
+
