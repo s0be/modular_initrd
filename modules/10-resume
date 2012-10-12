@@ -1,16 +1,24 @@
 #!/bin/ash
+#
+# This is based off of the resume section on:
+#   http://wiki.sourcemage.org/HowTo/Initramfs
+#
+# modified to include support for an offset for the resume file.
+
+RESUMECOUNT="${RESUMECOUNT:-0}"
 
 tryresume () {
 	RESUME=`cat /proc/cmdline | sed -re 's:.*resume\=([0-9a-zA-Z\/]*) ?.*:\1:'`
 	OFFSET=`cat /proc/cmdline | sed -re 's:.*resume_offset\=([0-9a-zA-Z\/]*) ?.*:\1:'`
         echo ''
-        echo '  Attempting to resume from suspend-to-disk. '
 
 	if [ $OFFSET ] ; then
+		echo ' Attempting to resume from suspend-to-disk. '
 		echo ' Partition: ' $RESUME ' | Offset: ' $OFFSET
         	/bin/resume -r $RESUME -o $OFFSET >>/tmp/initrdlog 2>&1 ||
                 	echo '  resume: error: could not resume'
 	else
+		echo ' Attempting to resume from suspend-to-disk. '
 		echo ' Partition: ' $RESUME 
 		/bin/resume -r $RESUME >>/tmp/initrdlog 2>&1 ||
 			echo '  resume: error: could not resume'
@@ -19,5 +27,8 @@ tryresume () {
         echo ''
 }
 
+grep -q 'noresume' /proc/cmdline && return
+[ $RESUMECOUNT -ne 0 ] || return
+
 echo "Press any key to skip resume"
-grep -q 'noresume' /proc/cmdline || countdown 3 "" "tryresume"
+countdown 3 "" "tryresume"

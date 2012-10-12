@@ -1,5 +1,8 @@
 #!/bin/ash
 #
+#The basic usage is:
+#
+#  countdown {Seconds} {Interrupted} {Not}
 countdown () {
   local CUR=$1
   local LST=0

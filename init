@@ -1,10 +1,22 @@
 #!/bin/ash
+#
+
+# First, if busybox is available, allow it to install it's symlinks
+[ -e /bin/busybox ] && /bin/busybox --install -s
+
 mount -t tmpfs -o size=100m tmpfs /tmp
 mount -t proc none /proc >>/tmp/initrdlog 2>&1
 mount -t sysfs none /sys >>/tmp/initrdlog 2>&1
 
-. modules/00-countdown
-. modules/00-shell
+# Load some Helper scripts I've cobbled from other peoples work or
+# written on my own
+. modules/01-countdown
+
+# ALLOWSHELL=3
+. modules/02-shell
+
+# Attempt to resume
+# RESUMECOUNT=3
 . modules/10-resume
 
 uuidlabel_root() {
