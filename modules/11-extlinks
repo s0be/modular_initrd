@@ -1,0 +1,12 @@
+#!/bin/ash
+#
+# This is based off of the resume section on:
+#   http://wiki.sourcemage.org/HowTo/Initramfs
+#
+# modified to include support for an offset for the resume file.
+
+[ -e /bin/mke2fs ] || return
+
+ln -sf /bin/mke2fs /bin/mkfs.ext2
+ln -sf /bin/mke2fs /bin/mkfs.ext3
+ln -sf /bin/mke2fs /bin/mkfs.ext4

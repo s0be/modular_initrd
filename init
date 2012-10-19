@@ -19,6 +19,9 @@ mount -t sysfs none /sys >>/tmp/initrdlog 2>&1
 # RESUMECOUNT=3
 . modules/10-resume
 
+# Create EXT2/3/4 symlinks
+. modules/11-extlinks
+
 uuidlabel_root() {
     for cmd in $(cat /proc/cmdline) ; do
         case $cmd in
