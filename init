@@ -1,4 +1,4 @@
-#!/bin/ash
+#!/bin/busybox ash
 #
 
 # First, if busybox is available, allow it to install it's symlinks
